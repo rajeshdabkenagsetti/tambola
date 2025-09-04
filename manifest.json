@@ -1,0 +1,16 @@
+{
+    "name": "TambolaMaster Pro",
+    "short_name": "TambolaPro",
+    "description": "Calculate booklet prices and distribute prizes for your Housie/Tambola event!",
+    "start_url": "/tambola-master-pro/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#9333ea",
+    "icons": [
+        {
+            "src": "/tambola-master-pro/icon.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        }
+    ]
+}

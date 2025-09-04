@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TambolaMaster Pro</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.3/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        header {
+            text-align: center;
+            padding: 20px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        #logo {
+            max-height: 100px;
+            margin-bottom: 10px;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        nav button, section button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        nav button:hover, section button:hover {
+            background-color: #218838;
+            transform: scale(1.05);
+        }
+        section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .hidden {
+            display: none;
+        }
+        h2 {
+            color: #007bff;
+            margin-bottom: 15px;
+        }
+        label {
+            display: inline-block;
+            width: 220px;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+        input[type="number"], input[type="file"], input[type="password"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            width: 200px;
+        }
+        input[readonly] {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+        .round-details {
+            display: none;
+            margin-top: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        .toggle {
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .toggle:hover {
+            background-color: #0056b3;
+        }
+        .summary-boxes {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .summary-boxes > div {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            flex: 1;
+            min-width: 150px;
+            text-align: center;
+        }
+        .price-box {
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            display: inline-block;
+        }
+        canvas {
+            max-width: 200px;
+            max-height: 200px;
+            margin: 10px auto;
+            display: block;
+        }
+        #override-modal, #password-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        #override-modal > div, #password-modal > div {
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            text-align: center;
+            font-family: 'Roboto', sans-serif;
+        }
+        #override-modal h3, #password-modal h3 {
+            color: #007bff;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        #override-modal label, #password-modal label {
+            display: block;
+            width: auto;
+            text-align: left;
+            margin: 8px 0;
+            font-size: 14px;
+        }
+        #override-modal input, #password-modal input {
+            width: calc(100% - 20px);
+            margin-bottom: 10px;
+            font-size: 14px;
+            padding: 8px;
+        }
+        #override-modal button, #password-modal button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 15px;
+        }
+        #close-modal, #close-password-modal {
+            color: #aaa;
+            float: right;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        #close-modal:hover, #close-password-modal:hover {
+            color: #000;
+        }
+        .dark-mode {
+            background-color: #333;
+            color: #f4f4f9;
+        }
+        .dark-mode section {
+            background-color: #444;
+        }
+        .dark-mode th {
+            background-color: #0056b3;
+        }
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        @media (max-width: 600px) {
+            label, input {
+                width: 100%;
+            }
+            nav {
+                flex-direction: column;
+            }
+            .summary-boxes {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <img id="logo" src="/tambola-master-pro/icon.png" alt="Event Logo">
+        <h1>TambolaMaster Pro</h1>
+        <p>Enhanced</p>
+        <p>Calculate booklet prices and distribute prizes for your Housie/Tambola event!</p>
+    </header>
+
+    <nav>
+        <button id="dark-mode-btn">Dark Mode</button>
+        <button id="admin-btn">Admin</button>
+        <button id="pdf-report">PDF Report</button>
+        <button id="reset-btn">Reset</button>
+        <button id="finance-btn">Finance</button>
+    </nav>
+
+    <section id="admin-settings" class="hidden">
+        <h2>Admin Settings</h2>
+        <div>
+            <label>Upload Event Logo:</label>
+            <input type="file" id="logo-upload">
+        </div>
+        <div>
+            <h3>Financial Parameters</h3>
+            <label>Caller Fees (₹):</label> <input type="number" id="caller-fees" value="0"><br>
+            <label>GST Percentage (%):</label> <input type="number" id="gst-percent" value="0">
+        </div>
+        <div>
+            <h3>Game Structure</h3>
+            <label>Number of Regular Rounds:</label> <input type="number" id="num-regular" value="8"><br>
+            <label>Number of Bingo Rounds:</label> <input type="number" id="num-bingo" value="2"><br>
+            <label>Regular Round Non-House Percentage (%):</label> <input type="number" id="non-house-percent" value="40"><br>
+            <label>Number of Part Games per Regular Round:</label> <input type="number" id="num-part" value="2"><br>
+            <label>Number of Sheet Prizes per Regular Round:</label> <input type="number" id="num-sheet" value="1"><br>
+            <label>Number of Houses per Regular Round:</label> <input type="number" id="num-house-regular" value="3"><br>
+            <label>Number of Houses per Bingo Round:</label> <input type="number" id="num-house-bingo" value="1">
+        </div>
+        <button id="save-settings">Save Settings</button>
+    </section>
+
+    <section id="booklet-pricing">
+        <h2>Booklet Pricing</h2>
+        <label>Total Prize Money to Distribute (₹):</label> <input type="number" id="total-prize-money" value="0"><br>
+        <button id="calc-suggested-price">Calculate Suggested Price</button>
+        <div class="price-box">
+            <label>Suggested Booklet Price (₹):</label>
+            <input type="number" id="suggested-price" value="0" readonly>
+        </div>
+        <div class="price-box">
+            <label>Suggested Number of Booklets:</label>
+            <input type="number" id="target-booklets" value="0" readonly>
+        </div>
+        <label>Actual Booklet Price (₹):</label> <input type="number" id="actual-price" value="0"><br>
+        <label>Actual Booklets Sold:</label> <input type="number" id="actual-sold" value="0"><br>
+        <button id="accept-suggested-price">Accept Suggested Price</button>
+        <button id="reject-suggested-price">Reject Suggested Price</button>
+        <button id="calc-prize-dist">Calculate Prize Distribution</button>
+    </section>
+
+    <section id="round-prize-distribution">
+        <h2>Round Prize Distribution</h2>
+        <div class="toggle" id="regular-toggle">Toggle Regular Round ►</div>
+        <div class="round-details" id="regular-details">
+            <p>Total Percentage: <span id="regular-total-percent">0%</span></p>
+            <table id="regular-table">
+                <thead>
+                    <tr>
+                        <th>Prize Type</th>
+                        <th>% Split</th>
+                        <th>Suggested Amount (₹)</th>
+                        <th>Actual Amount (₹)</th>
+                        <th>Difference (₹)</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="regular-tbody">
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="4">Cumulative for Regular Round</th>
+                        <th id="regular-cum-diff" style="color: black;">0</th>
+                        <th id="regular-status"></th>
+                    </tr>
+                </tfoot>
+            </table>
+            <canvas id="regular-chart"></canvas>
+        </div>
+
+        <div class="toggle" id="bingo-toggle">Toggle Bingo Round ►</div>
+        <div class="round-details" id="bingo-details">
+            <p>Total Percentage: <span id="bingo-total-percent">0%</span></p>
+            <table id="bingo-table">
+                <thead>
+                    <tr>
+                        <th>Prize Type</th>
+                        <th>% Split</th>
+                        <th>Suggested Amount (₹)</th>
+                        <th>Actual Amount (₹)</th>
+                        <th>Difference (₹)</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="bingo-tbody">
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="4">Cumulative for Bingo Round</th>
+                        <th id="bingo-cum-diff" style="color: black;">0</th>
+                        <th id="bingo-status"></th>
+                    </tr>
+                </tfoot>
+            </table>
+            <canvas id="bingo-chart"></canvas>
+        </div>
+    </section>
+
+    <section id="financial-summary" class="hidden">
+        <h2>Financial Summary</h2>
+        <div class="summary-boxes">
+            <div>
+                <h3>Revenue</h3>
+                <h2>₹<span id="revenue">0</span></h2>
+                <p>From <span id="from-booklets">0</span> booklets</p>
+            </div>
+            <div>
+                <h3>Prizes</h3>
+                <h2>₹<span id="prizes">0</span></h2>
+                <p><span id="num-rounds">0</span> rounds</p>
+            </div>
+            <div>
+                <h3>Profit</h3>
+                <h2>₹<span id="profit">0</span></h2>
+                <p><span id="margin">0%</span> margin</p>
+            </div>
+            <div>
+                <h3>Price/Booklet</h3>
+                <h2>₹<span id="price-per">0</span></h2>
+                <p>Target: ₹<span id="target-price">0</span></p>
+            </div>
+            <div>
+                <h3>Booklets</h3>
+                <h2>Target: <span id="target-book">0</span></h2>
+                <p>Actual: <span id="actual-book">0</span></p>
+            </div>
+        </div>
+        <canvas id="finance-chart"></canvas>
+        <table id="financial-table">
+            <tr>
+                <td>Description</td><td>Amount</td><td>Description</td><td>Amount</td>
+            </tr>
+            <tr>
+                <td>Number of Regular Rounds</td><td id="num-regular-disp">8</td>
+                <td>Total Regular Rounds Prizes (₹)</td><td id="total-regular-prizes">0</td>
+            </tr>
+            <tr>
+                <td>Number of Bingo Rounds</td><td id="num-bingo-disp">2</td>
+                <td>Total Bingo Rounds Prizes (₹)</td><td id="total-bingo-prizes">0</td>
+            </tr>
+            <tr>
+                <td>Caller Fees (₹)</td><td id="caller-fees-disp">0</td>
+                <td>Total Gain/Loss for Regular Rounds (₹)</td><td id="total-gain-regular">0</td>
+            </tr>
+            <tr>
+                <td>GST Percentage (%)</td><td id="gst-percent-disp">0</td>
+                <td>Total Gain/Loss for Bingo Rounds (₹)</td><td id="total-gain-bingo">0</td>
+            </tr>
+            <tr>
+                <td>GST Amount (₹)</td><td id="gst-amount">0</td>
+                <td>Decided Prize Money (₹)</td><td id="decided-prize">0</td>
+            </tr>
+            <tr>
+                <td>Expected Revenue (Target) (₹)</td><td id="expected-revenue">0</td>
+                <td>Actual Revenue (₹)</td><td id="actual-revenue">0</td>
+            </tr>
+            <tr>
+                <td colspan="2">Net Profit/Loss (₹)</td><td colspan="2" id="net-profit">0</td>
+            </tr>
+        </table>
+    </section>
+
+    <div id="override-modal">
+        <div>
+            <span id="close-modal">&times;</span>
+            <h3>Override Values</h3>
+            <p>Please key in the override amounts.</p>
+            <div id="modal-inputs"></div>
+            <button id="submit-override">Submit</button>
+        </div>
+    </div>
+
+    <div id="password-modal">
+        <div>
+            <span id="close-password-modal">&times;</span>
+            <h3>Enter Password</h3>
+            <p>Please enter the password to access this section.</p>
+            <input type="password" id="password-input">
+            <button id="submit-password">Submit</button>
+        </div>
+    </div>
+
+    <script>
+        const password = "tambola123";
+        let currentRound = '';
+        let regularItems = [];
+        let bingoItems = [];
+        let regularChart, bingoChart, financeChart;
+        let currentSectionToUnlock = '';
+        const currentDateTime = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+
+        // Toggle functionality
+        const toggles = document.querySelectorAll('.toggle');
+        toggles.forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                const details = toggle.nextElementSibling;
+                if (details.style.display === 'block') {
+                    details.style.display = 'none';
+                    toggle.innerHTML = toggle.innerHTML.replace('▼', '►');
+                } else {
+                    details.style.display = 'block';
+                    toggle.innerHTML = toggle.innerHTML.replace('►', '▼');
+                }
+            });
+        });
+
+        // Close modals
+        document.getElementById('close-modal').addEventListener('click', () => {
+            document.getElementById('override-modal').style.display = 'none';
+        });
+        document.getElementById('close-password-modal').addEventListener('click', () => {
+            document.getElementById('password-modal').style.display = 'none';
+        });
+
+        // Dark Mode
+        document.getElementById('dark-mode-btn').addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+        });
+
+        // Reset
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            location.reload();
+        });
+
+        // Admin Button
+        document.getElementById('admin-btn').addEventListener('click', () => {
+            currentSectionToUnlock = 'admin-settings';
+            document.getElementById('password-modal').style.display = 'block';
+            document.getElementById('password-input').value = '';
+        });
+
+        // Finance Button
+        document.getElementById('finance-btn').addEventListener('click', () => {
+            currentSectionToUnlock = 'financial-summary';
+            document.getElementById('password-modal').style.display = 'block';
+            document.getElementById('password-input').value = '';
+        });
+
+        // Submit Password
+        document.getElementById('submit-password').addEventListener('click', () => {
+            const pass = document.getElementById('password-input').value;
+            if (pass === password) {
+                document.getElementById(currentSectionToUnlock).classList.remove('hidden');
+                document.getElementById('password-modal').style.display = 'none';
+            } else {
+                alert('Incorrect password');
+            }
+        });
+
+        // Save Settings
+        document.getElementById('save-settings').addEventListener('click', () => {
+            alert('Settings saved!');
+            document.getElementById('admin-settings').classList.add('hidden');
+        });
+
+        // Logo Upload
+        document.getElementById('logo-upload').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    document.getElementById('logo').src = reader.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Calculate Suggested Price
+        document.getElementById('calc-suggested-price').addEventListener('click', () => {
+            const totalPrize = parseInt(document.getElementById('total-prize-money').value) || 0;
+            if (totalPrize === 0) {
+                alert('Please enter a valid total prize money.');
+                return;
+            }
+            const suggested = Math.round(0.00536 * totalPrize + 373);
+            document.getElementById('suggested-price').value = suggested;
+            const targetBooklets = Math.round(totalPrize / suggested);
+            document.getElementById('target-booklets').value = targetBooklets;
+            updateFinancialSummary();
+        });
+
+        // Accept Suggested Price
+        document.getElementById('accept-suggested-price').addEventListener('click', () => {
+            const suggested = parseInt(document.getElementById('suggested-price').value) || 0;
+            document.getElementById('actual-price').value = suggested;
+            updateFinancialSummary();
+        });
+
+        // Reject Suggested Price
+        document.getElementById('reject-suggested-price').addEventListener('click', () => {
+            document.getElementById('override-modal').style.display = 'block';
+            const modalInputs = document.getElementById('modal-inputs');
+            modalInputs.innerHTML = '';
+            modalInputs.innerHTML += `<label>Override Booklet Price (₹): <input type="number" id="modal-actual-price"></label>`;
+            modalInputs.innerHTML += `<label>Actual Booklets Sold: <input type="number" id="modal-actual-sold"></label>`;
+            currentRound = 'price';
+        });
+
+        // Calculate Prize Distribution
+        document.getElementById('calc-prize-dist').addEventListener('click', () => {
+            const totalPrize = parseInt(document.getElementById('total-prize-money').value) || 0;
+            const numRegular = parseInt(document.getElementById('num-regular').value) || 0;
+            const numBingo = parseInt(document.getElementById('num-bingo').value) || 0;
+            const totalRounds = numRegular + numBingo;
+            if (totalRounds === 0) {
+                alert('Please set the number of rounds.');
+                return;
+            }
+            const perRound = Math.round(totalPrize / totalRounds);
+
+            // Regular
+            const nonHousePercent = parseInt(document.getElementById('non-house-percent').value) || 0;
+            const housePercent = 100 - nonHousePercent;
+            const numPart = parseInt(document.getElementById('num-part').value) || 0;
+            const numSheet = parseInt(document.getElementById('num-sheet').value) || 0;
+            const numHouseRegular = parseInt(document.getElementById('num-house-regular').value) || 0;
+            const totalNonHouseItems = numPart + numSheet;
+            let partPercent = 0;
+            let sheetPercent = 0;
+            if (totalNonHouseItems > 0) {
+                partPercent = nonHousePercent * (numPart / totalNonHouseItems);
+                sheetPercent = nonHousePercent * (numSheet / totalNonHouseItems);
+            }
+            const eachPartPercent = numPart > 0 ? partPercent / numPart : 0;
+            const eachSheetPercent = numSheet > 0 ? sheetPercent / numSheet : 0;
+
+            const houseRatios = Array.from({length: numHouseRegular}, (_, i) => numHouseRegular - i);
+            const houseSumRatio = houseRatios.reduce((a, b) => a + b, 0) || 1;
+            const eachHousePercent = houseRatios.map(r => housePercent * (r / houseSumRatio));
+
+            const eachPartSuggested = Math.round(perRound * eachPartPercent / 100);
+            const eachSheetSuggested = Math.round(perRound * eachSheetPercent / 100);
+            const eachHouseSuggested = eachHousePercent.map(p => Math.round(perRound * p / 100));
+
+            regularItems = [];
+            let chartLabels = [];
+            let chartData = [];
+            let totalRegularPercent = 0;
+            const regularTbody = document.getElementById('regular-tbody');
+            regularTbody.innerHTML = '';
+            for (let i = 1; i <= numPart; i++) {
+                const id = `part-${i}`;
+                regularItems.push({id, suggested: eachPartSuggested});
+                regularTbody.innerHTML += `<tr><td>Part Game ${i}</td><td>${Math.round(eachPartPercent)}%</td><td id="${id}-suggested">${eachPartSuggested}</td><td id="${id}-actual">0</td><td id="${id}-diff" style="color: black;">0</td><td id="${id}-status"></td><td class="action-buttons"><button onclick="acceptRow('${id}')">Accept</button><button onclick="rejectRow('${id}')">Reject</button></td></tr>`;
+                chartLabels.push(`Part Game ${i}`);
+                chartData.push(Math.round(eachPartPercent));
+                totalRegularPercent += Math.round(eachPartPercent);
+            }
+            for (let i = 1; i <= numSheet; i++) {
+                const id = `sheet-${i}`;
+                regularItems.push({id, suggested: eachSheetSuggested});
+                regularTbody.innerHTML += `<tr><td>Sheet Prize ${i}</td><td>${Math.round(eachSheetPercent)}%</td><td id="${id}-suggested">${eachSheetSuggested}</td><td id="${id}-actual">0</td><td id="${id}-diff" style="color: black;">0</td><td id="${id}-status"></td><td class="action-buttons"><button onclick="acceptRow('${id}')">Accept</button><button onclick="rejectRow('${id}')">Reject</button></td></tr>`;
+                chartLabels.push(`Sheet Prize ${i}`);
+                chartData.push(Math.round(eachSheetPercent));
+                totalRegularPercent += Math.round(eachSheetPercent);
+            }
+            for (let i = 1; i <= numHouseRegular; i++) {
+                const id = `house-${i}`;
+                const percent = Math.round(eachHousePercent[i-1]);
+                const suggested = eachHouseSuggested[i-1];
+                regularItems.push({id, suggested});
+                regularTbody.innerHTML += `<tr><td>House ${i}</td><td>${percent}%</td><td id="${id}-suggested">${suggested}</td><td id="${id}-actual">0</td><td id="${id}-diff" style="color: black;">0</td><td id="${id}-status"></td><td class="action-buttons"><button onclick="acceptRow('${id}')">Accept</button><button onclick="rejectRow('${id}')">Reject</button></td></tr>`;
+                chartLabels.push(`House ${i}`);
+                chartData.push(percent);
+                totalRegularPercent += percent;
+            }
+            document.getElementById('regular-total-percent').textContent = totalRegularPercent + '%';
+
+            if (regularChart) regularChart.destroy();
+            regularChart = new Chart(document.getElementById('regular-chart'), {
+                type: 'pie',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        data: chartData,
+                        backgroundColor: ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff', '#ff9f40']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'right' } }
+                }
+            });
+
+            // Bingo
+            const numHouseBingo = parseInt(document.getElementById('num-house-bingo').value) || 0;
+            const bingoHousePercent = 100;
+            const bingoHouseRatios = Array.from({length: numHouseBingo}, (_, i) => numHouseBingo - i);
+            const bingoHouseSumRatio = bingoHouseRatios.reduce((a, b) => a + b, 0) || 1;
+            const eachBingoHousePercent = bingoHouseRatios.map(r => bingoHousePercent * (r / bingoHouseSumRatio));
+            const eachBingoHouseSuggested = eachBingoHousePercent.map(p => Math.round(perRound * p / 100));
+
+            bingoItems = [];
+            chartLabels = [];
+            chartData = [];
+            let totalBingoPercent = 0;
+            const bingoTbody = document.getElementById('bingo-tbody');
+            bingoTbody.innerHTML = '';
+            for (let i = 1; i <= numHouseBingo; i++) {
+                const id = `bingo-house-${i}`;
+                const percent = Math.round(eachBingoHousePercent[i-1]);
+                const suggested = eachBingoHouseSuggested[i-1];
+                bingoItems.push({id, suggested});
+                bingoTbody.innerHTML += `<tr><td>House ${i}</td><td>${percent}%</td><td id="${id}-suggested">${suggested}</td><td id="${id}-actual">0</td><td id="${id}-diff" style="color: black;">0</td><td id="${id}-status"></td><td class="action-buttons"><button onclick="acceptRow('${id}')">Accept</button><button onclick="rejectRow('${id}')">Reject</button></td></tr>`;
+                chartLabels.push(`House ${i}`);
+                chartData.push(percent);
+                totalBingoPercent += percent;
+            }
+            document.getElementById('bingo-total-percent').textContent = totalBingoPercent + '%';
+
+            if (bingoChart) bingoChart.destroy();
+            bingoChart = new Chart(document.getElementById('bingo-chart'), {
+                type: 'pie',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        data: chartData,
+                        backgroundColor: ['#ff6384', '#36a2eb', '#ffce56']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'right' } }
+                }
+            });
+
+            updateFinancialSummary();
+        });
+
+        function acceptRow(id) {
+            const item = [...regularItems, ...bingoItems].find(i => i.id === id);
+            if (item) {
+                document.getElementById(`${id}-actual`).textContent = item.suggested;
+                updateDifferences(id.startsWith('bingo') ? 'bingo' : 'regular');
+            }
+        }
+
+        function rejectRow(id) {
+            currentRound = id.startsWith('bingo') ? 'bingo' : 'regular';
+            const modalInputs = document.getElementById('modal-inputs');
+            modalInputs.innerHTML = '';
+            const item = [...regularItems, ...bingoItems].find(i => i.id === id);
+            if (item) {
+                const type = item.id.split('-')[0].charAt(0).toUpperCase() + item.id.split('-')[0].slice(1);
+                const num = item.id.includes('bingo') ? item.id.split('-')[2] : item.id.split('-')[1];
+                modalInputs.innerHTML += `<label>${type} ${num} Actual: <input type="number" id="modal-${item.id}"></label>`;
+            }
+            document.getElementById('override-modal').style.display = 'block';
+        }
+
+        // Submit Override
+        document.getElementById('submit-override').addEventListener('click', () => {
+            if (currentRound === 'price') {
+                const overridePrice = parseInt(document.getElementById('modal-actual-price').value) || 0;
+                const overrideActualSold = parseInt(document.getElementById('modal-actual-sold').value) || 0;
+                document.getElementById('actual-price').value = overridePrice;
+                document.getElementById('actual-sold').value = overrideActualSold;
+            } else {
+                const items = currentRound === 'regular' ? regularItems : bingoItems;
+                items.forEach(item => {
+                    const input = document.getElementById(`modal-${item.id}`);
+                    if (input) {
+                        const value = parseInt(input.value) || 0;
+                        document.getElementById(`${item.id}-actual`).textContent = value;
+                    }
+                });
+                updateDifferences(currentRound);
+            }
+            document.getElementById('override-modal').style.display = 'none';
+            updateFinancialSummary();
+        });
+
+        function updateDifferences(round) {
+            const items = round === 'regular' ? regularItems : bingoItems;
+            let cum = 0;
+            items.forEach(item => {
+                const sug = item.suggested;
+                const act = parseInt(document.getElementById(`${item.id}-actual`).textContent) || 0;
+                const diff = sug - act;
+                document.getElementById(`${item.id}-diff`).textContent = diff;
+                if (diff > 0) {
+                    document.getElementById(`${item.id}-diff`).style.color = 'green';
+                    document.getElementById(`${item.id}-status`).textContent = 'Gain';
+                } else if (diff < 0) {
+                    document.getElementById(`${item.id}-diff`).style.color = 'red';
+                    document.getElementById(`${item.id}-status`).textContent = 'Loss';
+                } else {
+                    document.getElementById(`${item.id}-diff`).style.color = 'black';
+                    document.getElementById(`${item.id}-status`).textContent = '';
+                }
+                cum += diff;
+            });
+            const cumId = `${round}-cum-diff`;
+            const statusId = `${round}-status`;
+            document.getElementById(cumId).textContent = cum;
+            if (cum > 0) {
+                document.getElementById(cumId).style.color = 'green';
+                document.getElementById(statusId).textContent = 'Gain';
+            } else if (cum < 0) {
+                document.getElementById(cumId).style.color = 'red';
+                document.getElementById(statusId).textContent = 'Loss';
+            } else {
+                document.getElementById(cumId).style.color = 'black';
+                document.getElementById(statusId).textContent = '';
+            }
+            updateFinancialSummary();
+        }
+
+        function updateFinancialSummary() {
+            const numRegular = parseInt(document.getElementById('num-regular').value) || 0;
+            const numBingo = parseInt(document.getElementById('num-bingo').value) || 0;
+            const totalRounds = numRegular + numBingo;
+
+            const regularTotalActual = regularItems.reduce((sum, item) => sum + (parseInt(document.getElementById(`${item.id}-actual`).textContent) || 0), 0);
+            const bingoTotalActual = bingoItems.reduce((sum, item) => sum + (parseInt(document.getElementById(`${item.id}-actual`).textContent) || 0), 0);
+
+            const totalRegularPrizes = numRegular * regularTotalActual;
+            const totalBingoPrizes = numBingo * bingoTotalActual;
+            const totalPrizes = totalRegularPrizes + totalBingoPrizes;
+
+            const regularCumDiff = parseInt(document.getElementById('regular-cum-diff').textContent) || 0;
+            const bingoCumDiff = parseInt(document.getElementById('bingo-cum-diff').textContent) || 0;
+            const totalRegularGainLoss = numRegular * regularCumDiff;
+            const totalBingoGainLoss = numBingo * bingoCumDiff;
+
+            const actualPrice = parseInt(document.getElementById('actual-price').value) || 0;
+            const actualSold = parseInt(document.getElementById('actual-sold').value) || 0;
+            const actualRevenue = actualPrice * actualSold;
+
+            const gstPercent = parseInt(document.getElementById('gst-percent').value) || 0;
+            const gstAmount = Math.round(actualRevenue * gstPercent / 100);
+
+            const callerFees = parseInt(document.getElementById('caller-fees').value) || 0;
+
+            const netProfit = actualRevenue - totalPrizes - callerFees - gstAmount;
+
+            const suggestedPrice = parseInt(document.getElementById('suggested-price').value) || 0;
+            const targetBooklets = parseInt(document.getElementById('target-booklets').value) || 0;
+            const expectedRevenue = suggestedPrice * targetBooklets;
+
+            // Update top summary
+            document.getElementById('revenue').textContent = actualRevenue;
+            document.getElementById('from-booklets').textContent = actualSold;
+            document.getElementById('prizes').textContent = totalPrizes;
+            document.getElementById('num-rounds').textContent = totalRounds;
+            document.getElementById('profit').textContent = netProfit;
+            const margin = actualRevenue > 0 ? Math.round((netProfit / actualRevenue) * 100) : 0;
+            document.getElementById('margin').textContent = margin;
+            document.getElementById('price-per').textContent = actualPrice;
+            document.getElementById('target-price').textContent = suggestedPrice;
+            document.getElementById('target-book').textContent = targetBooklets;
+            document.getElementById('actual-book').textContent = actualSold;
+
+            // Update financial table
+            document.getElementById('num-regular-disp').textContent = numRegular;
+            document.getElementById('total-regular-prizes').textContent = totalRegularPrizes;
+            document.getElementById('num-bingo-disp').textContent = numBingo;
+            document.getElementById('total-bingo-prizes').textContent = totalBingoPrizes;
+            document.getElementById('caller-fees-disp').textContent = callerFees;
+            document.getElementById('total-gain-regular').textContent = totalRegularGainLoss;
+            document.getElementById('gst-percent-disp').textContent = gstPercent;
+            document.getElementById('total-gain-bingo').textContent = totalBingoGainLoss;
+            document.getElementById('gst-amount').textContent = gstAmount;
+            document.getElementById('decided-prize').textContent = totalPrizes;
+            document.getElementById('expected-revenue').textContent = expectedRevenue;
+            document.getElementById('actual-revenue').textContent = actualRevenue;
+            document.getElementById('net-profit').textContent = netProfit;
+
+            // Finance Chart
+            if (financeChart) financeChart.destroy();
+            financeChart = new Chart(document.getElementById('finance-chart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Revenue', 'Prizes', 'Profit'],
+                    datasets: [{
+                        label: 'Financials (₹)',
+                        data: [actualRevenue, totalPrizes, netProfit],
+                        backgroundColor: ['#36a2eb', '#ff6384', '#ffce56']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: { y: { beginAtZero: true } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        // Generate PDF
+        document.getElementById('pdf-report').addEventListener('click', () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const pageWidth = doc.internal.pageSize.width;
+            let y = 10;
+
+            // Header
+            doc.setFontSize(16);
+            doc.setTextColor(0, 123, 255);
+            doc.text('TambolaMaster Pro Financial Report', pageWidth / 2, y, { align: 'center' });
+            y += 10;
+
+            // Logo and Date/Time
+            const logo = document.getElementById('logo');
+            if (logo.src) {
+                try {
+                    doc.addImage(logo.src, 'PNG', 10, y, 20, 20);
+                } catch (e) {
+                    console.error('Error adding logo to PDF:', e);
+                }
+            }
+            doc.setFontSize(8);
+            doc.setTextColor(100);
+            doc.text(`Generated on: ${currentDateTime}`, pageWidth - 10, y + 5, { align: 'right' });
+            y += 25;
+
+            // Regular Round Summary
+            doc.setFontSize(12);
+            doc.setTextColor(0, 123, 255);
+            doc.text('Regular Round Summary', 10, y);
+            y += 7;
+            doc.autoTable({
+                html: '#regular-table',
+                startY: y,
+                theme: 'striped',
+                headStyles: { fillColor: [0, 123, 255], textColor: 255, fontSize: 8 },
+                bodyStyles: { fontSize: 7 },
+                alternateRowStyles: { fillColor: [240, 240, 240] },
+                columns: [
+                    { header: 'Prize Type', dataKey: 'col0' },
+                    { header: '% Split', dataKey: 'col1' },
+                    { header: 'Suggested Amount (₹)', dataKey: 'col2' },
+                    { header: 'Actual Amount (₹)', dataKey: 'col3' },
+                    { header: 'Difference (₹)', dataKey: 'col4' },
+                    { header: 'Status', dataKey: 'col5' }
+                ],
+                columnStyles: { 
+                    col0: { cellWidth: 30 }, 
+                    col1: { cellWidth: 20 }, 
+                    col2: { cellWidth: 30 }, 
+                    col3: { cellWidth: 30 }, 
+                    col4: { cellWidth: 30 }, 
+                    col5: { cellWidth: 20 }
+                },
+                margin: { top: 35, bottom: 10 }
+            });
+            y = doc.lastAutoTable.finalY + 7;
+
+            // Bingo Round Summary
+            doc.setFontSize(12);
+            doc.setTextColor(0, 123, 255);
+            doc.text('Bingo Round Summary', 10, y);
+            y += 7;
+            doc.autoTable({
+                html: '#bingo-table',
+                startY: y,
+                theme: 'striped',
+                headStyles: { fillColor: [0, 123, 255], textColor: 255, fontSize: 8 },
+                bodyStyles: { fontSize: 7 },
+                alternateRowStyles: { fillColor: [240, 240, 240] },
+                columns: [
+                    { header: 'Prize Type', dataKey: 'col0' },
+                    { header: '% Split', dataKey: 'col1' },
+                    { header: 'Suggested Amount (₹)', dataKey: 'col2' },
+                    { header: 'Actual Amount (₹)', dataKey: 'col3' },
+                    { header: 'Difference (₹)', dataKey: 'col4' },
+                    { header: 'Status', dataKey: 'col5' }
+                ],
+                columnStyles: { 
+                    col0: { cellWidth: 30 }, 
+                    col1: { cellWidth: 20 }, 
+                    col2: { cellWidth: 30 }, 
+                    col3: { cellWidth: 30 }, 
+                    col4: { cellWidth: 30 }, 
+                    col5: { cellWidth: 20 }
+                },
+                margin: { top: 35, bottom: 10 }
+            });
+            y = doc.lastAutoTable.finalY + 7;
+
+            // Financial Summary
+            doc.setFontSize(12);
+            doc.setTextColor(0, 123, 255);
+            doc.text('Financial Summary', 10, y);
+            y += 7;
+            doc.autoTable({
+                html: '#financial-table',
+                startY: y,
+                theme: 'striped',
+                headStyles: { fillColor: [0, 123, 255], textColor: 255, fontSize: 8 },
+                bodyStyles: { fontSize: 7 },
+                alternateRowStyles: { fillColor: [240, 240, 240] },
+                margin: { top: 35, bottom: 10 }
+            });
+
+            doc.save('tambola_report.pdf');
+        });
+
+        // Add input listeners for auto-update
+        ['actual-price', 'actual-sold', 'caller-fees', 'gst-percent', 'num-regular', 'num-bingo', 'total-prize-money'].forEach(id => {
+            document.getElementById(id).addEventListener('input', updateFinancialSummary);
+        });
+
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/tambola-master-pro/sw.js')
+                .then(registration => {
+                    console.log('Service Worker registered with scope:', registration.scope);
+                })
+                .catch(error => {
+                    console.error('Service Worker registration failed:', error);
+                });
+        }
+    </script>
+</body>
+</html>
